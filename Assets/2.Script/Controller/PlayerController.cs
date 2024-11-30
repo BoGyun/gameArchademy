@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviour
         Vector3 forward = _mainCamera.transform.forward;
         Vector3 right = _mainCamera.transform.right;
 
-        // ī�޶��� y�� ȸ���� �������� �յ��¿� ������ ����
+
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
@@ -56,10 +56,10 @@ public class PlayerController : MonoBehaviour
         _movement = (forward * vertical + right * horizontal).normalized;
 
 
-        // �̵�
+
         transform.position += _movement * moveSpeed * Time.deltaTime;
 
-        // ȸ��
+
         if (_movement != Vector3.zero)
         {
             Quaternion toRotation = Quaternion.LookRotation(_movement, Vector3.up);
@@ -71,7 +71,6 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //����
             _rigidbody.AddForce(Vector3.up * 10, ForceMode.Impulse);
         }
     }

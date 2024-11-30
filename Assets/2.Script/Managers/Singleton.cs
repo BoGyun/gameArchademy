@@ -39,9 +39,19 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     }
 }
 
+public class PoolingObject
+{
+    public GameObject Instance { get; set; }
+}
+
+public class Bullet : PoolingObject 
+{
+    public Rigidbody Rigidbody { get; set; }
+}
 
 
-public class ObjectPool : MonoBehaviour
+
+    public class ObjectPool : MonoBehaviour
 {
 
     [SerializeField] private GameObject prefab;

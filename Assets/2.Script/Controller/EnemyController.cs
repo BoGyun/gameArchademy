@@ -15,6 +15,11 @@ public class EnemyController : MonoBehaviour
         {
             agent = GetComponent<NavMeshAgent>();
         }
+
+        EventManager.Instance.EnrollEvent(Events.OnScoreUpgrade, () =>
+        {
+            //실행할 로직 
+        });
     }
 
     void Update()
@@ -36,4 +41,15 @@ public class EnemyController : MonoBehaviour
             }
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Bullet"))
+        {
+            Singleton<ObjectPool>.Inst.ReturnObject(collision.gameObject);
+            EventManager.Instance.TriggerEvent(Events.OnScoreUpgrade);
+        }
+    }
+
+
 }
