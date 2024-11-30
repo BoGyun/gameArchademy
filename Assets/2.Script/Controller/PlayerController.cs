@@ -14,18 +14,22 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 40f;
     public float turnSpeed = 5f;
 
-    Rigidbody m_Rigidbody;
-    Vector3 m_Movement;
-    Camera mainCamera;
+    Rigidbody _rigidbody;
+    Vector3 _movement;
+    Camera _mainCamera;
 
-    // °ø°İ °ü·Ã º¯¼ö
-    public float detectionRadius = 5f;  // ±¸Çü °¨Áö ¹İ°æ
-    public Transform firePoint;         // ÇÃ·¹ÀÌ¾îÀÇ ¾ÕÂÊ À§Ä¡ (¿¹: ÃÑ±¸³ª ¹ß»ç ÁöÁ¡)
+    public float detectionRadius = 5f;
+    public GameObject bulletPrefab;   // ì´ì•Œ í”„ë¦¬íŒ¹
+    public Transform firePoint;       // ì´êµ¬ ìœ„ì¹˜ (í”Œë ˆì´ì–´ ì•)
+    public float bulletSpeed = 10f;   // ì´ì•Œì˜ ì†ë„
+    EPlayerState _currentState;
 
     void Start()
     {
-        m_Rigidbody = GetComponent<Rigidbody>();
-        mainCamera = Camera.main;
+        _rigidbody = GetComponent<Rigidbody>();
+        _mainCamera = Camera.main;
+
+        Singleton<ObjectPool>.Inst.SetPool(bulletPrefab, 50);
     }
 
     void Update()
@@ -40,25 +44,25 @@ public class PlayerController : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 forward = mainCamera.transform.forward;
-        Vector3 right = mainCamera.transform.right;
+        Vector3 forward = _mainCamera.transform.forward;
+        Vector3 right = _mainCamera.transform.right;
 
-        // Ä«¸Ş¶óÀÇ yÃà È¸ÀüÀ» ±âÁØÀ¸·Î ¾ÕµÚÁÂ¿ì ¹æÇâÀ» ¼³Á¤
+        // Ä«ï¿½Ş¶ï¿½ï¿½ï¿½ yï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Õµï¿½ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
         right.Normalize();
 
-        m_Movement = (forward * vertical + right * horizontal).normalized;
+        _movement = (forward * vertical + right * horizontal).normalized;
 
 
-        // ÀÌµ¿
-        transform.position += m_Movement * moveSpeed * Time.deltaTime;
+        // ï¿½Ìµï¿½
+        transform.position += _movement * moveSpeed * Time.deltaTime;
 
-        // È¸Àü
-        if (m_Movement != Vector3.zero)
+        // È¸ï¿½ï¿½
+        if (_movement != Vector3.zero)
         {
-            Quaternion toRotation = Quaternion.LookRotation(m_Movement, Vector3.up);
+            Quaternion toRotation = Quaternion.LookRotation(_movement, Vector3.up);
             transform.rotation = Quaternion.Lerp(transform.rotation, toRotation, turnSpeed * Time.deltaTime);
         }
     }
@@ -67,8 +71,8 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //Á¡ÇÁ
-            m_Rigidbody.AddForce(Vector3.up * 10, ForceMode.Impulse);
+            //ï¿½ï¿½ï¿½ï¿½
+            _rigidbody.AddForce(Vector3.up * 10, ForceMode.Impulse);
         }
     }
 
@@ -76,24 +80,30 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Collider[] hitColliders = Physics.OverlapSphere(firePoint.position, detectionRadius);
-
-            foreach (var hitCollider in hitColliders)
-            {
-                if (hitCollider.CompareTag("Enemy"))
-                {
-                    // Enemy ¿ÀºêÁ§Æ®¸¦ °¨ÁöÇÏ¸é ·Î±× Ãâ·Â
-                    Debug.Log("Enemy detected: " + hitCollider.name);
-                }
-            }
-
+            Fire();
         }
+    }
+
+    void Fire()
+    {
+
+        GameObject bullet = Singleton<ObjectPool>.Inst.GetObject(5f);
+
+        bullet.transform.position = firePoint.position;
+
+        Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
+        if (bulletRigidbody != null)
+        {
+            bulletRigidbody.linearVelocity = firePoint.forward * bulletSpeed;
+        }
+
+
     }
 
 
     void OnDrawGizmos()
     {
-        // µğ¹ö±ëÀ» À§ÇØ ±¸Ã¼ÀûÀÎ ¹üÀ§¸¦ ¾À ºä¿¡¼­ º¼ ¼ö ÀÖ°Ô Gizmo·Î Ç¥½Ã
+
         if (firePoint != null)
         {
             Gizmos.color = Color.red;
