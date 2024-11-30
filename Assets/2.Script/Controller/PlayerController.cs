@@ -18,6 +18,10 @@ public class PlayerController : MonoBehaviour
     Vector3 m_Movement;
     Camera mainCamera;
 
+    // 공격 관련 변수
+    public float detectionRadius = 5f;  // 구형 감지 반경
+    public Transform firePoint;         // 플레이어의 앞쪽 위치 (예: 총구나 발사 지점)
+
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
@@ -28,7 +32,7 @@ public class PlayerController : MonoBehaviour
     {
         HandleMovement();
         HandleJump();
-        HandleFire();
+        HandleAttack();
     }
 
     void HandleMovement()
@@ -68,13 +72,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void HandleFire()
+    void HandleAttack()
     {
         if (Input.GetMouseButtonDown(0))
         {
+            Collider[] hitColliders = Physics.OverlapSphere(firePoint.position, detectionRadius);
 
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("Enemy"))
+                {
+                    // Enemy 오브젝트를 감지하면 로그 출력
+                    Debug.Log("Enemy detected: " + hitCollider.name);
+                }
+            }
 
         }
     }
 
+
+    void OnDrawGizmos()
+    {
+        // 디버깅을 위해 구체적인 범위를 씬 뷰에서 볼 수 있게 Gizmo로 표시
+        if (firePoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(firePoint.position, detectionRadius);
+        }
+    }
 }
